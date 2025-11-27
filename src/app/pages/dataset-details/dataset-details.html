@@ -1,0 +1,219 @@
+<div class="dataset-details-container">
+    <!-- Header avec bouton retour -->
+    <div class="details-header">
+        <button class="back-button" (click)="goBack()">
+            <i class="ri-arrow-left-line"></i>
+            Retour aux datasets
+        </button>
+        
+        <div class="header-content">
+            <h1 class="page-title">{{ dataset?.name || 'Chargement...' }}</h1>
+            <p class="page-subtitle">Détails du jeu de données</p>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="details-content" *ngIf="dataset; else loadingOrError">
+        
+        <!-- Section Informations générales -->
+        <div class="info-section">
+            <h2 class="section-title">
+                <i class="ri-information-line"></i>
+                Informations générales
+            </h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="ri-file-text-line"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Nom</h3>
+                        <p>{{ dataset.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="ri-align-left"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Description</h3>
+                        <p>{{ dataset.description }}</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="ri-price-tag-3-line"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Thème</h3>
+                        <span class="theme-badge" [class]="getCategoryClass(dataset.category)">
+                            {{ getCategoryLabel(dataset.category) }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="ri-calendar-2-line"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Date d'import</h3>
+                        <p>{{ dataset.date }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Statistiques -->
+        <div class="info-section">
+            <h2 class="section-title">
+                <i class="ri-bar-chart-2-line"></i>
+                Statistiques
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="ri-table-line"></i>
+
+                    </div>
+                    <div class="stat-content">
+                        <h3>Lignes</h3>
+                        <p class="stat-number">{{ dataset.rows | number }}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon secondary">
+                        <i class="ri-layout-column-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Colonnes</h3>
+                        <p class="stat-number">{{ dataset.columns }}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="ri-database-2-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Taille estimée</h3>
+                        <p class="stat-number">{{ calculateSize() }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Aperçu des données -->
+        <div class="info-section" *ngIf="dataPreview && dataPreview.length > 0">
+            <h2 class="section-title">
+                <i class="ri-eye-line"></i>
+                Aperçu des données (5 premières lignes)
+            </h2>
+            
+            <div class="preview-container">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let header of dataHeaders" class="table-header">
+                                    {{ header }}
+                                    <span class="data-type" *ngIf="getColumnType(header)">
+                                        ({{ getColumnType(header) }})
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of dataPreview; let i = index" 
+                                [class.even]="i % 2 === 0"
+                                [class.odd]="i % 2 !== 0">
+                                <td *ngFor="let cell of row" class="table-cell">
+                                    {{ cell }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="preview-info">
+                    <p>
+                        <i class="ri-information-line"></i>
+                        Affichage des 5 premières lignes sur {{ dataset.rows }} au total
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Types de colonnes -->
+        <div class="info-section" *ngIf="columnTypes && columnTypes.length > 0">
+            <h2 class="section-title">
+                <i class="ri-code-s-slash-line"></i>
+                Types de colonnes
+            </h2>
+            
+            <div class="columns-grid">
+                <div class="column-card" *ngFor="let col of columnTypes; let i = index">
+                    <div class="column-header">
+                        <h4 class="column-name">{{ col.name }}</h4>
+                        <span class="column-type-badge" [class]="getTypeClass(col.type)">
+                            {{ col.type }}
+                        </span>
+                    </div>
+                    <div class="column-stats">
+                        <span class="column-stat">
+                            <i class="ri-checkbox-blank-circle-fill"></i>
+                            Valeurs uniques: {{ col.unique || 'N/A' }}
+                        </span>
+                        <span class="column-stat" *ngIf="col.nullCount !== undefined">
+                            <i class="ri-close-circle-fill"></i>
+                            Valeurs nulles: {{ col.nullCount }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-section">
+            
+            <button class="action-btn secondary-btn" (click)="downloadDataset()">
+                <i class="ri-download-line"></i>
+                Télécharger
+            </button>
+            
+            <button class="action-btn danger-btn" (click)="deleteDataset()">
+                <i class="ri-delete-bin-line"></i>
+                Supprimer
+            </button>
+        </div>
+
+    </div>
+
+    <!-- États de chargement et d'erreur -->
+    <ng-template #loadingOrError>
+        <div class="state-container" *ngIf="!errorMessage; else errorTemplate">
+            <div class="loading-state">
+                <i class="ri-loader-4-line spinning"></i>
+                <h3>Chargement des détails...</h3>
+                <p>Veuillez patienter pendant que nous récupérons les informations du dataset.</p>
+            </div>
+        </div>
+
+        <ng-template #errorTemplate>
+            <div class="error-state">
+                <i class="ri-error-warning-line"></i>
+                <h3>Dataset non trouvé</h3>
+                <p>{{ errorMessage }}</p>
+                <button class="back-button primary" (click)="goBack()">
+                    <i class="ri-arrow-left-line"></i>
+                    Retour aux datasets
+                </button>
+            </div>
+        </ng-template>
+    </ng-template>
+</div>
