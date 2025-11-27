@@ -1,0 +1,277 @@
+<div class="datasets-container">
+    <div class="datasets-header">
+        <h1 class="page-title">Catalogue Datasets</h1>
+        <p class="page-subtitle">Gérez vos jeux de données</p>
+    </div>
+
+    <!-- Section de contrôles modernisée -->
+    <div class="controls-section-modern">
+    <!-- Barre de recherche -->
+    <div class="search-box-modern">
+        <i class="ri-search-line"></i>
+        <input 
+            type="text" 
+            placeholder="Rechercher un dataset..." 
+            class="search-input-modern"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()">
+    </div>
+
+    <!-- Séparateur visuel -->
+    <div class="separator"></div>
+
+    <!-- Filtres compacts -->
+    <div class="filters-compact">
+        <div class="filter-item">
+            <select 
+                class="filter-select-modern"
+                [(ngModel)]="selectedTheme"
+                (change)="applyFilters()">
+                <option value="">Tous les thèmes</option>
+                <option value="finance">Finance</option>
+                <option value="sante">Santé</option>
+                <option value="transport">Transport</option>
+                <option value="education">Éducation</option>
+                <option value="technologie">Technologie</option>
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <input 
+                type="date" 
+                class="date-filter-modern"
+                [(ngModel)]="selectedDate"
+                (change)="applyFilters()"
+                placeholder="Date d'import">
+        </div>
+    </div>
+
+    <!-- Séparateur visuel -->
+    <div class="separator"></div>
+
+    <!-- Tri compact -->
+    <div class="sort-compact">
+        <select 
+            class="sort-select-modern"
+            [(ngModel)]="selectedSort"
+            (change)="applySort()">
+            <option value="name-asc">A → Z</option>
+            <option value="name-desc">Z → A</option>
+            <option value="date-desc">Récent</option>
+            <option value="date-asc">Ancien</option>
+            <option value="rows-desc">Lignes ↓</option>
+            <option value="rows-asc">Lignes ↑</option>
+        </select>
+    </div>
+
+    <!-- Séparateur visuel -->
+    <div class="separator" *ngIf="hasActiveFilters"></div>
+
+    <!-- Actions et résultats -->
+    <div class="actions-compact" *ngIf="hasActiveFilters">
+        <span class="results-count-modern">{{ filteredDatasets.length }} résultat(s)</span>
+        <button class="clear-filters-modern" (click)="clearFilters()">
+            <i class="ri-close-circle-fill"></i>
+            Effacer
+        </button>
+    </div>
+
+    <!-- Bouton Nouveau Dataset à droite -->
+    <div class="new-dataset-section">
+        <button class="new-dataset-btn" (click)="createNewDataset()">
+            <i class="ri-add-circle-fill"></i>
+            Nouveau dataset
+        </button>
+    </div>
+</div>
+
+    <!-- Grille de datasets -->
+    <div class="datasets-grid">
+        <!-- Dataset Card -->
+        <div 
+            class="dataset-card" 
+            *ngFor="let dataset of filteredDatasets; trackBy: trackByDatasetId"
+            [class.loading]="dataset.loading">
+            
+            <div class="dataset-header">
+                <h3 class="dataset-name">{{ dataset.name }}</h3>
+                <span 
+                    class="dataset-category" 
+                    [class]="getCategoryClass(dataset.category)">
+                    {{ getCategoryLabel(dataset.category) }}
+                </span>
+            </div>
+            
+            <p class="dataset-description">
+                {{ dataset.description }}
+            </p>
+            
+            <div class="dataset-stats">
+                <div class="stat">
+                    <i class="ri-table-2"></i>
+                    <span>{{ dataset.rows | number }} lignes</span>
+                </div>
+                <div class="stat">
+                    <i class="ri-layout-column-line"></i>
+                    <span>{{ dataset.columns }} colonnes</span>
+                </div>
+                <div class="stat">
+                    <i class="ri-calendar-2-line"></i>
+                    <span>{{ dataset.date }}</span>
+                </div>
+            </div>
+            
+            <div class="dataset-actions">
+                <button class="action-btn view-btn" (click)="viewDataset(dataset)">
+                    <i class="ri-eye-line"></i>
+                    Voir
+                </button>
+                <button class="action-btn analyze-btn" (click)="analyzeDataset(dataset)">
+                    <i class="ri-line-chart-line"></i>
+                    Analyser
+                </button>
+            </div>
+        </div>
+
+        <!-- État vide -->
+        <div class="empty-state" *ngIf="filteredDatasets.length === 0">
+            <i class="ri-database-2-line"></i>
+            <h3>Aucun dataset trouvé</h3>
+            <p>Aucun dataset ne correspond à vos critères de recherche.</p>
+            <button class="clear-filters-btn primary" (click)="clearFilters()">
+                Effacer les filtres
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal-overlay" [class.active]="showModal" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">Nouveau Dataset</h2>
+            <button class="modal-close" (click)="closeModal()">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+
+        <form class="modal-form" [formGroup]="datasetForm" (ngSubmit)="onSubmit()">
+            <!-- Champ Nom -->
+            <div class="form-group">
+                <label for="datasetName" class="form-label">
+                    Nom du dataset 
+                </label>
+                <input
+                    type="text"
+                    id="datasetName"
+                    formControlName="name"
+                    class="form-input"
+                    placeholder="Ex: Ventes_2024"
+                    [class.error]="datasetForm.get('name')?.invalid && datasetForm.get('name')?.touched">
+                <div class="error-message" *ngIf="datasetForm.get('name')?.invalid && datasetForm.get('name')?.touched">
+                    Le nom est requis et doit contenir au moins 3 caractères
+                </div>
+            </div>
+
+            <!-- Champ Description -->
+            <div class="form-group">
+                <label for="datasetDescription" class="form-label">
+                    Description 
+                </label>
+                <textarea
+                    id="datasetDescription"
+                    formControlName="description"
+                    class="form-textarea"
+                    placeholder="Décrivez le contenu de votre dataset..."
+                    rows="3"
+                    [class.error]="datasetForm.get('description')?.invalid && datasetForm.get('description')?.touched">
+                </textarea>
+                <div class="error-message" *ngIf="datasetForm.get('description')?.invalid && datasetForm.get('description')?.touched">
+                    La description est requise
+                </div>
+            </div>
+
+            <!-- Champ Thème -->
+            <div class="form-group">
+                <label for="datasetTheme" class="form-label">
+                    Thème 
+                </label>
+                <select
+                    id="datasetTheme"
+                    formControlName="theme"
+                    class="form-select"
+                    [class.error]="datasetForm.get('theme')?.invalid && datasetForm.get('theme')?.touched">
+
+                    <option value="">Sélectionnez un thème</option>
+
+                    <!-- Boucle venant de Firebase -->
+                    <option *ngFor="let t of themes" [value]="t.libelle">
+                        {{ t.libelle }}
+                    </option>
+
+                    </select>
+
+                <div class="error-message" *ngIf="datasetForm.get('theme')?.invalid && datasetForm.get('theme')?.touched">
+                    Veuillez sélectionner un thème
+                </div>
+            </div>
+
+            <!-- Zone d'import de fichier -->
+            <div class="form-group">
+                <label class="form-label">
+                    Fichier dataset 
+                </label>
+                <div class="file-upload-area"
+                    [class.dragover]="isDragover"
+                    [class.has-file]="selectedFile"
+                    (click)="fileInput.click()"
+                    (drop)="onFileDrop($event)"
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave($event)">
+                    
+                    <input
+                        #fileInput
+                        type="file"
+                        (change)="onFileSelected($event)"
+                        accept=".csv,.json"
+                        class="file-input"
+                        hidden>
+                    
+                    <div class="upload-content" *ngIf="!selectedFile">
+                        <i class="ri-upload-cloud-2-line"></i>
+                        <h4>Glissez-déposez votre fichier ici</h4>
+                        <p>Formats supportés: CSV, JSON</p>
+                        <span class="upload-browse">ou cliquez pour parcourir</span>
+                    </div>
+
+                    <div class="file-preview" *ngIf="selectedFile">
+                        <i class="ri-file-text-line"></i>
+                        <div class="file-info">
+                            <h5>{{ selectedFile.name }}</h5>
+                            <p>{{ selectedFile.size | fileSize }}</p>
+                        </div>
+                        <button type="button" class="remove-file" (click)="removeFile($event)">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="error-message" *ngIf="!selectedFile && formSubmitted">
+                    Veuillez sélectionner un fichier
+                </div>
+            </div>
+
+            <!-- Actions du formulaire -->
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="closeModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+                    <i class="ri-add-line" *ngIf="!isSubmitting"></i>
+                    <i class="ri-loader-4-line spinning" *ngIf="isSubmitting"></i>
+                    {{ isSubmitting ? 'Ajout en cours...' : 'Ajouter le dataset' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
