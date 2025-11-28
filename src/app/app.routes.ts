@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AccueilComponent } from './pages/accueil/accueil';
 import { Home } from './pages/home/home';
 import { Datasets } from './pages/datasets/datasets';
 import { LoginComponent } from './pages/login/login';
@@ -6,6 +7,7 @@ import { RegisterComponent } from './pages/register/register';
 import { authGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+    { path: '', component: AccueilComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     {
@@ -19,5 +21,4 @@ export const routes: Routes = [
             }
         ]
     },
-    
 ];
