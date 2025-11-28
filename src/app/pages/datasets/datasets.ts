@@ -33,6 +33,7 @@ interface Dataset {
   date: string;
   importDate: Date;
   loading?: boolean;
+  contenu?:string;
 }
 
 interface PageItem {
@@ -75,6 +76,8 @@ export class Datasets implements OnInit {
   startIndex: number = 0;
   endIndex: number = 0;
 
+  formError: string = '';
+
   constructor(
     private fb: FormBuilder, 
     private themeService: ThemeService, 
@@ -112,7 +115,8 @@ export class Datasets implements OnInit {
           columns: d.nbCol || d.columns || 0,
           date: importDate.toLocaleDateString('fr-FR'),
           importDate: importDate,
-          loading: false
+          loading: false,
+          contenu: d.contenu
         };
       });
 
@@ -302,6 +306,7 @@ export class Datasets implements OnInit {
     this.formSubmitted = false;
     this.selectedFile = null;
     this.isDragover = false;
+    this.formError = ''; 
   }
 
   onFileSelected(event: any) {
@@ -334,10 +339,19 @@ export class Datasets implements OnInit {
       const allowedTypes = ['text/csv', 'application/json'];
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       
+      // Vérifier le type de fichier
       if (allowedTypes.includes(file.type) || fileExtension === 'csv' || fileExtension === 'json') {
+        // Vérifier la taille (10MB max)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          this.formError = 'Le fichier est trop volumineux. Taille maximale: 10MB';
+          return;
+        }
+        
         this.selectedFile = file;
+        this.formError = ''; // Effacer l'erreur si le fichier est valide
       } else {
-        alert('Veuillez sélectionner un fichier CSV ou JSON valide.');
+        this.formError = 'Type de fichier non supporté. Veuillez sélectionner un fichier CSV ou JSON.';
       }
     }
   }
@@ -358,8 +372,20 @@ export class Datasets implements OnInit {
 
   async onSubmit() {
     this.formSubmitted = true;
+    this.formError = ''; // Réinitialiser l'erreur à chaque soumission
 
-    if (this.datasetForm.invalid || !this.selectedFile) return;
+    // Vérifier si le formulaire est valide
+    if (this.datasetForm.invalid || !this.selectedFile) {
+      this.collectFormErrors();
+      return;
+    }
+
+    // Vérifier la taille du fichier (exemple: max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB en bytes
+    if (this.selectedFile.size > maxSize) {
+      this.formError = 'Le fichier est trop volumineux. Taille maximale: 10MB';
+      return;
+    }
 
     this.isSubmitting = true;
 
@@ -379,11 +405,39 @@ export class Datasets implements OnInit {
 
       await this.datasetsService.addDataset(datasetToSave);
       this.closeModal();
-      this.isSubmitting = false;
-
+      
     } catch (err) {
       console.error("Erreur ajout dataset :", err);
+      this.formError = 'Une erreur est survenue lors de l\'ajout du dataset. Veuillez réessayer.';
+    } finally {
       this.isSubmitting = false;
+    }
+  }
+
+  private collectFormErrors() {
+    const errors: string[] = [];
+
+    // Vérifier les champs du formulaire
+    if (this.datasetForm.get('name')?.invalid) {
+      errors.push('Le nom du dataset est requis (minimum 3 caractères)');
+    }
+
+    if (this.datasetForm.get('description')?.invalid) {
+      errors.push('La description est requise');
+    }
+
+    if (this.datasetForm.get('theme')?.invalid) {
+      errors.push('Veuillez sélectionner un thème');
+    }
+
+    // Vérifier le fichier
+    if (!this.selectedFile) {
+      errors.push('Veuillez sélectionner un fichier');
+    }
+
+    // Combiner toutes les erreurs
+    if (errors.length > 0) {
+      this.formError = 'Veuillez corriger les erreurs suivantes :<br>' + errors.join('<br>');
     }
   }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'; 
-import { Firestore, collection, addDoc, collectionData, doc, docData } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, collectionData, doc, docData, deleteDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -34,5 +34,13 @@ export class DatasetsService {
     const docRef = doc(this.firestore, `datasets/${id}`);
     return docData(docRef, { idField: 'id' }); 
     // idField permet d’inclure l’ID dans l’objet retourné
+  }
+
+  // 🆕 SUPPRIMER un dataset par ID
+  deleteDataset(id: string) {
+    console.log(`🗑️ SERVICE : deleteDataset(${id}) appelé`);
+
+    const docRef = doc(this.firestore, `datasets/${id}`);
+    return deleteDoc(docRef);
   }
 }

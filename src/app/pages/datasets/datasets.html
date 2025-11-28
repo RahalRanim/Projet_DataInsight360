@@ -321,6 +321,13 @@
                 </div>
             </div>
 
+            <!-- Zone d'affichage des erreurs -->
+            <div class="form-group" *ngIf="formError">
+                <div class="error-summary">
+                    <div class="error-summary-content" [innerHTML]="formError"></div>
+                </div>
+            </div>
+
             <!-- Actions du formulaire -->
             <div class="form-actions">
                 <button type="button" class="btn-cancel" (click)="closeModal()">
@@ -335,3 +342,4 @@
         </form>
     </div>
 </div>
+

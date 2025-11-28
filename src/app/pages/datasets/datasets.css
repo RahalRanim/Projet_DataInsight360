@@ -1447,3 +1447,24 @@
 .datasets-grid.page-changing {
     opacity: 0.7;
 }
+
+/* Style pour la zone de résumé des erreurs */
+.error-summary {
+  background-color: #fee;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.error-summary-content {
+  color: #721c24;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.error-summary-content br {
+  margin-bottom: 4px;
+  display: block;
+  content: "";
+}

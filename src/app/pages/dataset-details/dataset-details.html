@@ -217,3 +217,33 @@
         </ng-template>
     </ng-template>
 </div>
+
+
+
+<!-- Modale de confirmation -->
+<app-confirm-modal 
+  *ngIf="showConfirmModal"
+  title="Confirmation de suppression"
+  [message]="'Êtes-vous sûr de vouloir supprimer le dataset &quot;' + (dataset?.name || '') + '&quot; ? Cette action est irréversible.'"
+  btnOkText="Supprimer"
+  btnCancelText="Annuler"
+  (close)="onConfirmModalClose($event)">
+</app-confirm-modal>
+
+<!-- Modale de succès -->
+<app-succes-modal 
+  *ngIf="showSuccessModal"
+  title="Succès"
+  [message]="successMessage"
+  btnText="OK"
+  (close)="onSuccessModalClose()">
+</app-succes-modal>
+
+<!-- Modale d'erreur -->
+<app-error-modal 
+  *ngIf="showErrorModal"
+  title="Erreur"
+  [message]="errorMsg"
+  btnText="OK"
+  (close)="onErrorModalClose()">
+</app-error-modal>

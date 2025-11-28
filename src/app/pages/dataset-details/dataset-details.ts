@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { DatasetsService } from '../../services/datasets.service';
+import { ConfirmModal } from '../models/confirm-modal/confirm-modal';
+import { SuccesModal } from '../models/succes-modal/succes-modal';
+import { ErrorModal } from '../models/error-modal/error-modal';
 
 interface Dataset {
   id: string;
@@ -14,6 +17,7 @@ interface Dataset {
   date: string;
   importDate: Date;
   loading?: boolean;
+  contenu?: string;
 }
 
 interface ColumnType {
@@ -25,7 +29,10 @@ interface ColumnType {
 
 @Component({
   selector: 'app-dataset-details',
-  imports: [CommonModule],
+  imports: [CommonModule,
+    ConfirmModal,
+    SuccesModal, 
+    ErrorModal],
   templateUrl: './dataset-details.html',
   styleUrl: './dataset-details.css',
 })
@@ -35,6 +42,13 @@ export class DatasetDetails implements OnInit {
   dataHeaders: string[] = [];
   columnTypes: ColumnType[] = [];
   errorMessage: string = '';
+
+  // Propriétés pour les modales
+  showConfirmModal = false;
+  showSuccessModal = false;
+  showErrorModal = false;
+  successMessage = '';
+  errorMsg = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -74,10 +88,10 @@ export class DatasetDetails implements OnInit {
   generateMockData() {
     if (!this.dataset) return;
 
-    // Générer des en-têtes de colonnes mock
-    this.dataHeaders = Array.from({ length: this.dataset.columns }, (_, i) => 
-      `Colonne_${i + 1}`
-    );
+   const contenu = this.dataset.contenu?.trim() || "";
+    const firstLine = contenu.split('\n')[0]; 
+    this.dataHeaders = firstLine.split(',');
+
 
     // Générer des données mock (5 premières lignes)
     this.dataPreview = Array.from({ length: 5 }, (_, rowIndex) =>
@@ -188,57 +202,91 @@ export class DatasetDetails implements OnInit {
 
     try {
       // Essayer de récupérer depuis Firebase d'abord
-      this.downloadFromFirebase().catch(() => {
+      this.downloadFromFirebase().catch((error) => {
+        console.error('Erreur Firebase:', error);
         // Fallback: générer depuis l'aperçu
         this.downloadFromPreview();
       });
     } catch (error) {
       console.error('Erreur téléchargement:', error);
-      this.downloadFromPreview();
+      // Afficher la modale d'erreur
+      this.errorMsg = 'Erreur lors du téléchargement. Veuillez réessayer.';
+      this.showErrorModal = true;
     }
   }
 
   private async downloadFromFirebase() {
     if (!this.dataset) return;
 
-    this.datasetsService.getDatasetById(this.dataset.id).subscribe(datasetDoc => {
-      if (datasetDoc?.contenu) {
-        this.downloadFile(datasetDoc.contenu, `${this.dataset!.name}.csv`, 'text/csv');
-        this.showDownloadSuccess(`${this.dataset!.name}.csv`);
-      } else {
-        console.error('Contenu non disponible');
-        this.downloadFromPreview();
-      }
-    }, error => {
-      console.error('Erreur récupération dataset depuis Firebase :', error);
-      this.downloadFromPreview();
+    return new Promise((resolve, reject) => {
+      this.datasetsService.getDatasetById(this.dataset!.id).subscribe({
+        next: (datasetDoc) => {
+          if (datasetDoc?.contenu) {
+            try {
+              this.downloadFile(datasetDoc.contenu, `${this.dataset!.name}.csv`, 'text/csv');
+              // Afficher la modale de succès
+              this.successMessage = `Dataset "${this.dataset!.name}" téléchargé avec succès !`;
+              this.showSuccessModal = true;
+              resolve(true);
+            } catch (error) {
+              // Afficher la modale d'erreur
+              this.errorMsg = 'Erreur lors de la création du fichier.';
+              this.showErrorModal = true;
+              reject(error);
+            }
+          } else {
+            console.error('Contenu non disponible');
+            // Fallback vers l'aperçu
+            this.downloadFromPreview();
+            resolve(true);
+          }
+        },
+        error: (error) => {
+          console.error('Erreur récupération dataset depuis Firebase :', error);
+          // Fallback vers l'aperçu
+          this.downloadFromPreview();
+          resolve(true);
+        }
+      });
     });
   }
 
 
   private downloadFromPreview() {
     if (!this.dataset || !this.dataPreview.length) {
-      alert('Aucune donnée disponible pour le téléchargement');
+      // Afficher la modale d'erreur
+      this.errorMsg = 'Aucune donnée disponible pour le téléchargement';
+      this.showErrorModal = true;
       return;
     }
 
-    let csvContent = this.dataHeaders.join(',') + '\n';
-    
-    this.dataPreview.forEach(row => {
-      const escapedRow = row.map(cell => {
-        if (cell === null || cell === undefined) return '';
-        const stringValue = String(cell);
-        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-          return '"' + stringValue.replace(/"/g, '""') + '"';
-        }
-        return stringValue;
+    try {
+      let csvContent = this.dataHeaders.join(',') + '\n';
+      
+      this.dataPreview.forEach(row => {
+        const escapedRow = row.map(cell => {
+          if (cell === null || cell === undefined) return '';
+          const stringValue = String(cell);
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return '"' + stringValue.replace(/"/g, '""') + '"';
+          }
+          return stringValue;
+        });
+        csvContent += escapedRow.join(',') + '\n';
       });
-      csvContent += escapedRow.join(',') + '\n';
-    });
 
-    this.downloadFile(csvContent, `${this.dataset.name}.csv`, 'text/csv');
-    this.showDownloadSuccess(`${this.dataset.name}.csv`);
+      this.downloadFile(csvContent, `${this.dataset.name}.csv`, 'text/csv');
+      // Afficher la modale de succès
+      this.successMessage = `Aperçu du dataset "${this.dataset.name}" téléchargé avec succès !`;
+      this.showSuccessModal = true;
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de l\'aperçu:', error);
+      // Afficher la modale d'erreur
+      this.errorMsg = 'Erreur lors de la création du fichier. Veuillez réessayer.';
+      this.showErrorModal = true;
+    }
   }
+
 
   private showLoadingIndicator() {
     // Vous pouvez implémenter un indicateur de chargement ici
@@ -246,15 +294,20 @@ export class DatasetDetails implements OnInit {
   }
 
   private downloadFile(content: string, filename: string, mimeType: string) {
-    const blob = new Blob([content], { type: mimeType });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du fichier:', error);
+      throw error;
+    }
   }
 
   private showDownloadSuccess(filename: string) {
@@ -265,13 +318,54 @@ export class DatasetDetails implements OnInit {
   }
 
   deleteDataset() {
-    if (this.dataset && confirm(`Êtes-vous sûr de vouloir supprimer le dataset "${this.dataset.name}" ?`)) {
-      // Logique de suppression
-      console.log('Suppression du dataset:', this.dataset.name);
-      // Implémentez la logique de suppression ici
-      
-      // Retour à la liste après suppression
-      this.router.navigate(['/datasets']);
+    // Afficher la modale de confirmation au lieu de confirm()
+    this.showConfirmModal = true;
+  }
+
+  onConfirmModalClose(confirmed: boolean) {
+    this.showConfirmModal = false;
+    
+    if (confirmed && this.dataset) {
+      // L'utilisateur a confirmé la suppression
+      this.dataset.loading = true;
+
+      // Appeler le service pour supprimer le dataset
+      this.datasetsService.deleteDataset(this.dataset.id)
+        .then(() => {
+          console.log('✅ Dataset supprimé avec succès:', this.dataset!.name);
+          
+          // Supprimer aussi du localStorage si présent
+          localStorage.removeItem('dataset');
+          
+          // Afficher la modale de succès
+          this.successMessage = `Dataset "${this.dataset!.name}" supprimé avec succès !`;
+          this.showSuccessModal = true;
+        })
+        .catch((error) => {
+          console.error('❌ Erreur lors de la suppression:', error);
+          
+          // Afficher la modale d'erreur - utilisez errorMsg au lieu de errorMessage
+          this.errorMsg = 'Erreur lors de la suppression du dataset. Veuillez réessayer.';
+          this.showErrorModal = true;
+          
+          // Réinitialiser l'indicateur de chargement en cas d'erreur
+          if (this.dataset) {
+            this.dataset.loading = false;
+          }
+        });
     }
   }
+
+  onSuccessModalClose() {
+    this.showSuccessModal = false;
+    // Rediriger vers la liste des datasets
+    this.router.navigate(['/datasets']);
+  }
+
+  onErrorModalClose() {
+    this.showErrorModal = false;
+    // L'utilisateur peut rester sur la page pour réessayer
+  }
+
+
 }
