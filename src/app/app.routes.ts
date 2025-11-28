@@ -4,6 +4,7 @@ import { Home } from './pages/home/home';
 import { Datasets } from './pages/datasets/datasets';
 import { LoginComponent } from './pages/login/login';
 import { RegisterComponent } from './pages/register/register';
+import { DatasetDetails } from './pages/dataset-details/dataset-details';
 import { authGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -18,6 +19,10 @@ export const routes: Routes = [
             {
                 path: 'datasets',
                 component: Datasets
+            },
+            {
+                path: 'datasets/:id',
+                component: DatasetDetails
             }
         ]
     },

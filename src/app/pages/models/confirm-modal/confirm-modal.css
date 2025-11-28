@@ -1,0 +1,196 @@
+/* ==================== */
+/* BACKDROP PERSONNALISE */
+/* ==================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* ==================== */
+/* GESTION DU SCROLL    */
+/* ==================== */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  padding-right: 0 !important;
+}
+
+/* ==================== */
+/* STYLE DE LA MODALE   */
+/* ==================== */
+.modal {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: 0;
+}
+
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 0.5rem;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  outline: 0;
+  padding: 32px;
+  text-align: center;
+}
+
+/* ==================== */
+/* ANIMATIONS           */
+/* ==================== */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out, opacity 0.3s ease;
+  transform: translateY(-50px);
+  opacity: 0;
+}
+
+.modal.show .modal-dialog {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Animation confirmation */
+.confirm-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ==================== */
+/* ELEMENTS INTERNES    */
+/* ==================== */
+.modal-icon {
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #212529;
+}
+
+.modal-message {
+  font-size: 1rem;
+  margin-bottom: 24px;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+/* ==================== */
+/* MODAL FOOTER - BOUTONS CÔTE À CÔTE */
+/* ==================== */
+.modal-footer {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: row; /* Changé de column à row */
+  justify-content: center; /* Centre les boutons horizontalement */
+  gap: 16px; /* Espace entre les boutons */
+  align-items: center;
+}
+
+/* Bouton annuler */
+.modal-button.cancel-button {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: auto; /* Changé de 100% à auto */
+  min-width: 120px; /* Largeur minimale pour les deux boutons */
+  margin: 0; /* Supprimé le margin auto */
+  display: inline-block; /* Changé de block à inline-block */
+  flex: 1; /* Les boutons prennent la même largeur */
+  max-width: 140px; /* Largeur maximale */
+}
+
+.modal-button.cancel-button:hover {
+  background: #d5d5d5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Bouton confirmer */
+.modal-button.confirm-button {
+  background: #1890ff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: auto; /* Changé de 100% à auto */
+  min-width: 120px; /* Largeur minimale pour les deux boutons */
+  margin: 0; /* Supprimé le margin auto */
+  display: inline-block; /* Changé de block à inline-block */
+  flex: 1; /* Les boutons prennent la même largeur */
+  max-width: 140px; /* Largeur maximale */
+}
+
+.modal-button.confirm-button:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+/* ==================== */
+/* RESPONSIVE           */
+/* ==================== */
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 380px;
+    margin: 1.75rem auto;
+  }
+  
+  /* Sur mobile, on peut revenir à une disposition verticale si nécessaire */
+  @media (max-width: 480px) {
+    .modal-footer {
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .modal-button.cancel-button,
+    .modal-button.confirm-button {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+}

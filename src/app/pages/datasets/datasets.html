@@ -6,91 +6,94 @@
 
     <!-- Section de contrôles modernisée -->
     <div class="controls-section-modern">
-    <!-- Barre de recherche -->
-    <div class="search-box-modern">
-        <i class="ri-search-line"></i>
-        <input 
-            type="text" 
-            placeholder="Rechercher un dataset..." 
-            class="search-input-modern"
-            [(ngModel)]="searchTerm"
-            (input)="onSearchChange()">
-    </div>
+        <!-- Barre de recherche -->
+        <div class="search-box-modern">
+            <i class="ri-search-line"></i>
+            <input 
+                type="text" 
+                placeholder="Rechercher un dataset..." 
+                class="search-input-modern"
+                [(ngModel)]="searchTerm"
+                (input)="onSearchChange()">
+        </div>
 
-    <!-- Séparateur visuel -->
-    <div class="separator"></div>
+        <!-- Séparateur visuel -->
+        <div class="separator"></div>
 
-    <!-- Filtres compacts -->
-    <div class="filters-compact">
-        <div class="filter-item">
+        <!-- Filtres compacts -->
+        <div class="filters-compact">
+            <div class="filter-item">
+                <select 
+                    class="filter-select-modern"
+                    [(ngModel)]="selectedTheme"
+                    (change)="applyFilters()"
+                    aria-placeholder="Tous les themes">
+                    
+                    <!-- Option par défaut -->
+                    <option value="">Tous les thèmes</option>
+
+                    <!-- Options dynamiques -->
+                    <option *ngFor="let t of themes" [value]="t.libelle">
+                        {{ t.libelle }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <input 
+                    type="date" 
+                    class="date-filter-modern"
+                    [(ngModel)]="selectedDate"
+                    (change)="applyFilters()"
+                    placeholder="Date d'import">
+            </div>
+        </div>
+
+        <!-- Séparateur visuel -->
+        <div class="separator"></div>
+
+        <!-- Tri compact -->
+        <div class="sort-compact">
             <select 
-                class="filter-select-modern"
-                [(ngModel)]="selectedTheme"
-                (change)="applyFilters()">
-                <option value="">Tous les thèmes</option>
-                <option value="finance">Finance</option>
-                <option value="sante">Santé</option>
-                <option value="transport">Transport</option>
-                <option value="education">Éducation</option>
-                <option value="technologie">Technologie</option>
+                class="sort-select-modern"
+                [(ngModel)]="selectedSort"
+                (change)="applySort()">
+                <option value="name-asc">A → Z</option>
+                <option value="name-desc">Z → A</option>
+                <option value="date-desc">Récent</option>
+                <option value="date-asc">Ancien</option>
+                <option value="rows-desc">Lignes ↓</option>
+                <option value="rows-asc">Lignes ↑</option>
             </select>
         </div>
 
-        <div class="filter-item">
-            <input 
-                type="date" 
-                class="date-filter-modern"
-                [(ngModel)]="selectedDate"
-                (change)="applyFilters()"
-                placeholder="Date d'import">
+        <!-- Séparateur visuel -->
+        <div class="separator" *ngIf="hasActiveFilters"></div>
+
+        <!-- Actions et résultats -->
+        <div class="actions-compact" *ngIf="hasActiveFilters">
+            <span class="results-count-modern">{{ totalFilteredItems }} résultat(s)</span>
+            <button class="clear-filters-modern" (click)="clearFilters()">
+                <i class="ri-close-circle-fill"></i>
+                Effacer
+            </button>
+        </div>
+
+        <!-- Bouton Nouveau Dataset à droite -->
+        <div class="new-dataset-section">
+            <button class="new-dataset-btn" (click)="createNewDataset()">
+                <i class="ri-add-circle-fill"></i>
+                Nouveau dataset
+            </button>
         </div>
     </div>
-
-    <!-- Séparateur visuel -->
-    <div class="separator"></div>
-
-    <!-- Tri compact -->
-    <div class="sort-compact">
-        <select 
-            class="sort-select-modern"
-            [(ngModel)]="selectedSort"
-            (change)="applySort()">
-            <option value="name-asc">A → Z</option>
-            <option value="name-desc">Z → A</option>
-            <option value="date-desc">Récent</option>
-            <option value="date-asc">Ancien</option>
-            <option value="rows-desc">Lignes ↓</option>
-            <option value="rows-asc">Lignes ↑</option>
-        </select>
-    </div>
-
-    <!-- Séparateur visuel -->
-    <div class="separator" *ngIf="hasActiveFilters"></div>
-
-    <!-- Actions et résultats -->
-    <div class="actions-compact" *ngIf="hasActiveFilters">
-        <span class="results-count-modern">{{ filteredDatasets.length }} résultat(s)</span>
-        <button class="clear-filters-modern" (click)="clearFilters()">
-            <i class="ri-close-circle-fill"></i>
-            Effacer
-        </button>
-    </div>
-
-    <!-- Bouton Nouveau Dataset à droite -->
-    <div class="new-dataset-section">
-        <button class="new-dataset-btn" (click)="createNewDataset()">
-            <i class="ri-add-circle-fill"></i>
-            Nouveau dataset
-        </button>
-    </div>
-</div>
 
     <!-- Grille de datasets -->
     <div class="datasets-grid">
         <!-- Dataset Card -->
         <div 
             class="dataset-card" 
-            *ngFor="let dataset of filteredDatasets; trackBy: trackByDatasetId"
+            *ngFor="let dataset of paginatedDatasets; trackBy: trackByDatasetId"
             [class.loading]="dataset.loading">
             
             <div class="dataset-header">
@@ -102,7 +105,7 @@
                 </span>
             </div>
             
-            <p class="dataset-description">
+            <p class="dataset-description" [title]="dataset.description">
                 {{ dataset.description }}
             </p>
             
@@ -142,6 +145,63 @@
                 Effacer les filtres
             </button>
         </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="filteredDatasets.length > 0 && totalPages > 1">
+        <div class="pagination-info">
+            Affichage de {{ startIndex + 1 }} à {{ endIndex }} sur {{ totalFilteredItems }} datasets
+        </div>
+        
+        <div class="pagination-controls">
+            <button 
+                class="pagination-btn" 
+                [class.disabled]="currentPage === 1"
+                (click)="goToPage(1)"
+                title="Première page">
+                <i class="ri-skip-back-line"></i>
+            </button>
+            
+            <button 
+                class="pagination-btn" 
+                [class.disabled]="currentPage === 1"
+                (click)="previousPage()"
+                title="Page précédente">
+                <i class="ri-arrow-left-s-line"></i>
+            </button>
+
+            <!-- Pages numérotées -->
+            <div class="page-numbers">
+                <button 
+                    *ngFor="let pageItem of getVisiblePages(); let i = index"
+                    class="page-number"
+                    [class.active]="pageItem.type === 'number' && pageItem.value === currentPage"
+                    [class.ellipsis]="pageItem.type === 'ellipsis'"
+                    (click)="onPageClick(pageItem)"
+                    [disabled]="pageItem.type === 'ellipsis'"
+                    [title]="pageItem.type === 'number' ? 'Page ' + pageItem.value : ''">
+                    {{ pageItem.value }}
+                </button>
+            </div>
+
+            <button 
+                class="pagination-btn" 
+                [class.disabled]="currentPage === totalPages"
+                (click)="nextPage()"
+                title="Page suivante">
+                <i class="ri-arrow-right-s-line"></i>
+            </button>
+            
+            <button 
+                class="pagination-btn" 
+                [class.disabled]="currentPage === totalPages"
+                (click)="goToPage(totalPages)"
+                title="Dernière page">
+                <i class="ri-skip-forward-line"></i>
+            </button>
+        </div>
+
+        
     </div>
 </div>
 
@@ -258,6 +318,13 @@
                 </div>
                 <div class="error-message" *ngIf="!selectedFile && formSubmitted">
                     Veuillez sélectionner un fichier
+                </div>
+            </div>
+
+            <!-- Zone d'affichage des erreurs -->
+            <div class="form-group" *ngIf="formError">
+                <div class="error-summary">
+                    <div class="error-summary-content" [innerHTML]="formError"></div>
                 </div>
             </div>
 

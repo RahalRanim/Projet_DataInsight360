@@ -1,28 +1,46 @@
-import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+import { Injectable } from '@angular/core'; 
+import { Firestore, collection, addDoc, collectionData, doc, docData, deleteDoc } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatasetsService {
 
-  constructor(private firestore: Firestore, private storage: Storage) {}
+  constructor(private firestore: Firestore) {}
 
-  // 1️⃣ Upload fichier
-  uploadFile(file: File): Promise<string> {
-    const filePath = `datasets/${Date.now()}_${file.name}`;
-    const storageRef = ref(this.storage, filePath);
+  // 🔥 Ajouter un dataset
+  addDataset(dataset: any) {
+    console.log("🔥 SERVICE : addDataset() appelé");
+    console.log("Dataset envoyé :", dataset);
 
-    return uploadBytes(storageRef, file)
-      .then(() => getDownloadURL(storageRef));
+    const collectionRef = collection(this.firestore, 'datasets');
+    return addDoc(collectionRef, dataset);
   }
 
-  // 2️⃣ Ajouter le dataset dans Firestore
-  addDataset(dataset: any) {
-    console.log("🔥 SERVICE addDataset() appelé !");
-    console.log("Envoi : ", dataset);
-    const coll = collection(this.firestore, 'datasets');
-    return addDoc(coll, dataset);
+  // 🔥🔥 Récupérer tous les datasets
+  getAllDatasets(): Observable<any[]> {
+    console.log("📥 SERVICE : getAllDatasets() appelé");
+
+    const collectionRef = collection(this.firestore, 'datasets');
+    return collectionData(collectionRef, { idField: 'id' }); 
+    // idField permet d'ajouter automatiquement l'id Firestore dans l'objet
+  }
+
+  // 🔹 Récupérer un dataset par ID
+  getDatasetById(id: string): Observable<any> {
+    console.log(`📥 SERVICE : getDatasetById(${id}) appelé`);
+
+    const docRef = doc(this.firestore, `datasets/${id}`);
+    return docData(docRef, { idField: 'id' }); 
+    // idField permet d’inclure l’ID dans l’objet retourné
+  }
+
+  // 🆕 SUPPRIMER un dataset par ID
+  deleteDataset(id: string) {
+    console.log(`🗑️ SERVICE : deleteDataset(${id}) appelé`);
+
+    const docRef = doc(this.firestore, `datasets/${id}`);
+    return deleteDoc(docRef);
   }
 }

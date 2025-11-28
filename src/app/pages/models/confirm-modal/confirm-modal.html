@@ -1,0 +1,22 @@
+<div class="modal-backdrop" (click)="decline()"></div>
+<div class="modal fade show" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-icon confirm-animation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#1890ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+
+      <h4 class="modal-title">{{ title }}</h4>
+      <p class="modal-message">{{ message }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-button cancel-button" (click)="decline()">{{ btnCancelText }}</button>
+        <button type="button" class="modal-button confirm-button" (click)="accept()">{{ btnOkText }}</button>
+      </div>
+    </div>
+  </div>
+</div>
