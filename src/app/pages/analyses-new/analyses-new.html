@@ -1,0 +1,45 @@
+<div class="new-analysis-container">
+  <div class="header">
+    <h1 class="page-title">Lancer une analyse</h1>
+    <p class="page-subtitle">Choisissez un dataset et un type d’analyse</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="analysis-form">
+
+    <!-- Sélecteur Dataset -->
+    <div class="form-group">
+      <label>Dataset</label>
+      <select formControlName="datasetId">
+        <option value="">-- Sélectionner un dataset --</option>
+        <option *ngFor="let d of datasets" [value]="d.id">
+          {{ d.name }}
+        </option>
+      </select>
+      <div *ngIf="form.get('datasetId')?.touched && form.get('datasetId')?.invalid" class="error">
+        Dataset requis
+      </div>
+    </div>
+
+    <!-- Sélecteur Type d'analyse -->
+    <div class="form-group">
+      <label>Type d’analyse</label>
+      <select formControlName="type">
+        <option value="">-- Choisir le type d’analyse --</option>
+        <option *ngFor="let t of analyseTypes" [value]="t">
+          {{ t }}
+        </option>
+      </select>
+      <div *ngIf="form.get('type')?.touched && form.get('type')?.invalid" class="error">
+        Type requis
+      </div>
+    </div>
+    
+
+    <!-- Bouton et spinner -->
+    <button type="submit" [disabled]="form.invalid || isLoading" class="btn-submit">
+      <span *ngIf="!isLoading">Lancer l'analyse</span>
+      <span *ngIf="isLoading">Analyse en cours...</span>
+    </button>
+
+  </form>
+</div>

@@ -4,6 +4,8 @@ import { Datasets } from './pages/datasets/datasets';
 import { DatasetDetails } from './pages/dataset-details/dataset-details';
 import { Themes } from './pages/themes/themes';
 import { Users } from './pages/users/users';
+import { Analyses } from './pages/analyses/analyses';
+import { AnalysesNew } from './pages/analyses-new/analyses-new';
 
 export const routes: Routes = [
     {
@@ -25,7 +27,15 @@ export const routes: Routes = [
             {
                 path: 'users',
                 component: Users
-            }
+            }, 
+            {
+                path: 'analyses',
+                component: Analyses
+            },
+            {
+                path: "analyses/new",
+                component : AnalysesNew
+            },
         ]
     },
 ];
