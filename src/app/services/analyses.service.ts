@@ -75,7 +75,7 @@ export class AnalysesService {
       this.saveToStorage();
 
       return of(Analyse).pipe(
-        delay(10000),
+        delay(2000),
         map(a => this.finishAnalyse(a, dataset.data, column1, column2))
       );
     })
