@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -115,6 +115,7 @@ export class LoginComponent implements OnInit {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
+  // ✅ MÉTHODE MODIFIÉE : Redirection basée sur le rôle
   onSubmit(): void {
     if (this.loginForm.valid && !this.isBlocked) {
       this.loading = true;
@@ -126,7 +127,18 @@ export class LoginComponent implements OnInit {
         next: () => {
           this.resetAttempts();
           localStorage.removeItem('loginBlock');
-          this.router.navigate(['/home/dashboard']);
+          
+          // ✅ Récupérer le profil utilisateur pour vérifier le rôle
+          const userProfile = this.authService.getUserProfile();
+          
+          // ✅ Redirection basée sur le rôle
+          if (userProfile?.role === 'admin') {
+            console.log('Redirection vers dashboard admin');
+            this.router.navigate(['/home/dashboard']);
+          } else {
+            console.log('Redirection vers dashboard data scientist');
+            this.router.navigate(['/data-scientist/dashboard']);
+          }
         },
         error: (error) => {
           this.loading = false;
@@ -136,7 +148,18 @@ export class LoginComponent implements OnInit {
             this.blockAccount();
           } else {
             const remainingAttempts = this.maxAttempts - this.loginAttempts;
-            this.errorMessage = `Identifiants incorrects. ${remainingAttempts} tentative(s) restante(s).`;
+            
+            // Messages d'erreur plus spécifiques
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+              this.errorMessage = `Email ou mot de passe incorrect. ${remainingAttempts} tentative(s) restante(s).`;
+            } else if (error.code === 'auth/user-not-found') {
+              this.errorMessage = `Aucun compte trouvé avec cet email. ${remainingAttempts} tentative(s) restante(s).`;
+            } else if (error.code === 'auth/too-many-requests') {
+              this.errorMessage = 'Trop de tentatives. Compte temporairement bloqué.';
+              this.blockAccount();
+            } else {
+              this.errorMessage = `Identifiants incorrects. ${remainingAttempts} tentative(s) restante(s).`;
+            }
           }
         }
       });

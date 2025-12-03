@@ -4,6 +4,8 @@ import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
 import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 export interface UserProfile {
   email: string;
@@ -38,11 +40,23 @@ export class AuthService {
   // Connexion
   login(email: string, password: string): Observable<void> {
     return from(
-      signInWithEmailAndPassword(this.auth, email, password)
-        .then(async (credential) => {
-          await this.loadUserProfile(credential.user.uid);
-        })
-    );
+    signInWithEmailAndPassword(this.auth, email, password)
+  ).pipe(
+    switchMap(async (credential) => {
+      console.log('Connexion réussie, UID:', credential.user.uid);
+      
+      //Attendre que le profil soit chargé avant de continuer
+      await this.loadUserProfile(credential.user.uid);
+      
+      // Petit délai pour s'assurer que le signal est mis à jour
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }),
+    catchError((error) => {
+      console.error('Erreur de connexion:', error);
+      console.error('Code erreur:', error.code);
+      console.error('Message:', error.message);
+      return throwError(() => error);
+    }));
   }
 
   // Inscription
@@ -54,7 +68,7 @@ export class AuthService {
             email: email,
             name: userData.name || '',
             country: userData.country || '',
-            role: userData.role || 'user',
+            role: userData.role || 'data scientist',
             dateC: new Date()
           };
           await setDoc(doc(this.firestore, 'users', credential.user.uid), userProfile);

@@ -400,7 +400,7 @@ export class Users implements OnInit {
     const labels: { [key: string]: string } = {
       'admin': 'Administrateur',
       'user': 'Utilisateur',
-      'ds': 'Data Scientest'
+      'data scientist': 'Data Scientist'
     };
     return labels[role.toLowerCase()] || role;
   }

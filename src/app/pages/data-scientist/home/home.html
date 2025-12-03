@@ -1,0 +1,75 @@
+<div class="wrapper">
+    <!-- Overlay pour mobile -->
+    <div class="overlay" [class.active]="sidebarOpen && isMobile" (click)="closeSidebarOnMobile()"></div>
+    
+    <div class="side-bar" [class.open]="sidebarOpen" [class.mobile]="isMobile">
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-bars">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <h1 class="page-title">DataInsight360</h1>
+            </div>
+            
+            <!-- Bouton fermer dans la sidebar -->
+            <div class="close-toggle" (click)="toggleSidebar()" *ngIf="isMobile">
+                <i class="ri-close-line"></i>
+            </div>
+        </div>
+
+        <div class="profile">
+            <img src="../../../assets/images/avatar.png" alt="Profil" class="profile-img">
+            <div class="profile-info">
+                <span class="name">{{ userProfile?.name || 'Utilisateur' }}</span>
+                <span class="role">{{ userProfile?.role || 'Data Scientist' }}</span>
+            </div>
+        </div>
+
+        <div class="main">
+            <h6 class="section-title">NAVIGATION</h6>
+            <nav class="liens">
+                <a routerLink="/data-scientist/dashboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+                    <i class="ri-dashboard-line"></i>
+                    <span class="link-text">Dashboard</span>
+                </a>
+                <a routerLink="/data-scientist/datasets" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+                    <i class="ri-database-2-line"></i>
+                    <span class="link-text">Datasets</span>
+                </a>
+                <a routerLink="/data-scientist/analyses" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+                    <i class="ri-line-chart-line"></i>
+                    <span class="link-text">Analyses</span>
+                </a>
+                <a routerLink="/data-scientist/themes" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+                    <i class="ri-folder-3-fill"></i>
+                    <span class="link-text">Thèmes</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="footer">
+            <button 
+                class="logout-btn" 
+                (click)="logout()"
+                [disabled]="isLoggingOut"
+                [class.loading]="isLoggingOut"
+            >
+                <i class="ri-logout-box-r-line"></i>
+                <span class="logout-text">{{ isLoggingOut ? 'DÉCONNEXION...' : 'DÉCONNEXION' }}</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="affich" [class.sidebar-open]="sidebarOpen && isMobile">
+        <!-- Header mobile séparé -->
+        <div class="mobile-header" *ngIf="isMobile">
+            <div class="mobile-menu-toggle" (click)="toggleSidebar()">
+                <i class="ri-menu-line"></i>
+            </div>
+            <div class="mobile-title">DataInsight360</div>
+        </div>
+        <router-outlet></router-outlet>
+    </div>
+</div>
