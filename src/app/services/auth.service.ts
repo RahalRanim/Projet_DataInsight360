@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-         signOut, user, User } from '@angular/fire/auth';
+         signOut, user, User, sendPasswordResetEmail, verifyPasswordResetCode, confirmPasswordReset } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
@@ -104,4 +104,45 @@ export class AuthService {
   getUserProfile(): UserProfile | null {
     return this.userProfile();
   }
+
+  // Réinitialisation du mot de passe
+  resetPassword(email: string): Observable<void> {
+    console.log('Demande de réinitialisation pour:', email);
+    
+    const actionCodeSettings = {
+      // URL de votre page personnalisée de réinitialisation
+      url: `${window.location.origin}/reset-password`,
+      handleCodeInApp: true // ✅ Important : traiter le code dans l'app
+    };
+    
+    return from(
+      sendPasswordResetEmail(this.auth, email, actionCodeSettings)
+    ).pipe(
+      catchError((error) => {
+        console.error('Erreur réinitialisation:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  //Vérifier le code de réinitialisation
+  verifyPasswordResetCode(code: string): Observable<string> {
+    return from(verifyPasswordResetCode(this.auth, code)).pipe(
+      catchError((error) => {
+        console.error('Code invalide:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  //Confirmer le nouveau mot de passe
+  confirmPasswordReset(code: string, newPassword: string): Observable<void> {
+    return from(confirmPasswordReset(this.auth, code, newPassword)).pipe(
+      catchError((error) => {
+        console.error('Erreur confirmation:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
 }

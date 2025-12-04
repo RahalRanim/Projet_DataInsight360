@@ -12,12 +12,15 @@ import { authGuard, adminGuard, dataScientistGuard } from './guards/auth.guard';
 import { HomeDataScientist} from './pages/data-scientist/home/home';
 import { DashboardDSComponent } from './pages/data-scientist/dashboard/dashboard';
 import { ThemesDS } from './pages/data-scientist/themes/themes';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password';
 
 export const routes: Routes = [
     { path: '', component: AccueilComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'reset-password', component: ResetPasswordComponent },
     {
         path: 'home',
         component: Home,
