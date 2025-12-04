@@ -68,7 +68,7 @@ export class AuthService {
             email: email,
             name: userData.name || '',
             country: userData.country || '',
-            role: userData.role || 'data scientist',
+            role: userData.role || 'ds',
             dateC: new Date()
           };
           await setDoc(doc(this.firestore, 'users', credential.user.uid), userProfile);

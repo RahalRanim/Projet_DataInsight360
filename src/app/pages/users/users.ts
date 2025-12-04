@@ -399,8 +399,7 @@ export class Users implements OnInit {
   getRoleLabel(role: string): string {
     const labels: { [key: string]: string } = {
       'admin': 'Administrateur',
-      'user': 'Utilisateur',
-      'data scientist': 'Data Scientist'
+      'ds': 'Data Scientist'
     };
     return labels[role.toLowerCase()] || role;
   }

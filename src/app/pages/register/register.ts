@@ -43,7 +43,7 @@ export class RegisterComponent {
       
       this.authService.register(email, password, {
         name,
-        role: 'user' 
+        role: 'ds' 
       }).subscribe({
         next: () => {
           this.successMessage = 'Compte créé avec succès ! Redirection...';

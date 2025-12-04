@@ -132,7 +132,6 @@ export class Home implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ Getters pour accéder aux infos utilisateur
   get userProfile() {
     return this.authService.getUserProfile();
   }

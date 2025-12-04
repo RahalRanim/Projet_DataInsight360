@@ -30,8 +30,7 @@
                     (change)="applyFilters()">
                     <option value="">Tous les rôles</option>
                     <option value="admin">Administrateur</option>
-                    <option value="user">Utilisateur</option>
-                    <option value="DS">Data Scientest</option>
+                    <option value="ds">Data Scientist</option>
                 </select>
             </div>
 
@@ -259,8 +258,7 @@
                     [class.error]="userForm.get('role')?.invalid && userForm.get('role')?.touched">
                     <option value="">Sélectionnez un rôle</option>
                     <option value="admin">Administrateur</option>
-                    <option value="user">Utilisateur</option>
-                    <option value="viewer">Observateur</option>
+                    <option value="ds">Data Scientist</option>
                 </select>
                 <div class="error-message" *ngIf="userForm.get('role')?.invalid && userForm.get('role')?.touched">
                     Veuillez sélectionner un rôle

@@ -101,8 +101,8 @@
     padding: 8px 12px;
     border: 1px solid #fed7d7;
     border-radius: 8px;
-    background: #fff5f5;
-    color: #c53030;
+    background: #e60303;
+    color: #a10202;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -243,12 +243,7 @@
     color: white;
 }
 
-.user-role.user {
-    background: linear-gradient(135deg, #4299e1, #3182ce);
-    color: white;
-}
-
-.user-role.ds {
+.user-role.data-scientist {
     background: linear-gradient(135deg, #48bb78, #38a169);
     color: white;
 }

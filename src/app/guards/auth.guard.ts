@@ -35,7 +35,7 @@ export const dataScientistGuard: CanActivateFn = (route, state) => {
 
   const userProfile = authService.getUserProfile();
   
-  if (authService.currentUser() && userProfile?.role === 'data scientist') {
+  if (authService.currentUser() && userProfile?.role === 'ds') {
     return true;
   }
 
