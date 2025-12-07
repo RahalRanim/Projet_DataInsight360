@@ -449,7 +449,7 @@ export class Datasets implements OnInit {
   }
 
   analyzeDataset(dataset: Dataset) {
-    console.log('Analyser le dataset:', dataset.name);
+    this.router.navigate(['/analyses', dataset.id]);
   }
 
   getCategoryClass(category: string): string {

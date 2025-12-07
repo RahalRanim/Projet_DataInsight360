@@ -56,9 +56,23 @@ export function detectOutliers(values: number[]) {
 
   const outliers = values.filter(v => v < lower || v > upper);
 
-  return { q1, q3, iqr, lower, upper, outliers };
-}
+  // Utilisation de tes fonctions existantes
+  const min = minValue(values);
+  const max = maxValue(values);
+  const med = median(values);
 
+  return {
+    min,
+    q1,
+    median: med,
+    q3,
+    max,
+    iqr,
+    lower,
+    upper,
+    outliers
+  };
+}
 
 // ========== 3. CORRÉLATION (PEARSON) ==========
 
@@ -82,18 +96,20 @@ export function histogram(values: number[], nbBins = 10) {
   const binSize = (maxV - minV) / nbBins;
 
   const bins = Array(nbBins).fill(0);
+  const labels = [];
+
+  for (let i = 0; i < nbBins; i++) {
+    const start = minV + i * binSize;
+    const end = start + binSize;
+    labels.push(`${start.toFixed(1)} - ${end.toFixed(1)}`);
+  }
 
   values.forEach(v => {
     let index = Math.floor((v - minV) / binSize);
-    if (index === nbBins) index--; // pour valeur max
+    if (index === nbBins) index--;
     bins[index]++;
   });
 
-  return {
-    bins,
-    min: minV,
-    max: maxV,
-    binSize
-  };
-}
+  return { bins, labels, min: minV, max: maxV, binSize };
 
+}

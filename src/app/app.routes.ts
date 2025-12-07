@@ -6,6 +6,7 @@ import { Themes } from './pages/themes/themes';
 import { Users } from './pages/users/users';
 import { Analyses } from './pages/analyses/analyses';
 import { AnalysesNew } from './pages/analyses-new/analyses-new';
+import { AnalysesDetails } from './pages/analyses-details/analyses-details';
 
 export const routes: Routes = [
     {
@@ -36,6 +37,13 @@ export const routes: Routes = [
                 path: "analyses/new",
                 component : AnalysesNew
             },
+
+            {
+                path: "analyses/:id",
+                component : AnalysesDetails
+            },
+
+
         ]
     },
 ];

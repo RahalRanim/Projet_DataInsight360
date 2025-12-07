@@ -13,6 +13,8 @@ export interface Analyse {
     status: AnalyseStatus;
     startedAt: Date;
     finishedAt?: Date;
+    column1?: string;
+    column2?: string;
     result?: any;
 }
 

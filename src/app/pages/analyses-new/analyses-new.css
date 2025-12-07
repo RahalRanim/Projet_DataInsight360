@@ -102,6 +102,62 @@
   box-shadow: none;
 }
 
+/* Message d'information */
+.info-message {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-message p {
+  margin: 0;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* Message d'avertissement (analyse existe déjà) */
+.warning-message {
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.warning-message p {
+  margin: 0;
+  color: #7f1d1d;
+  font-weight: 500;
+}
+
+/* Spinner animation */
+.spinner-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .new-analysis-container {

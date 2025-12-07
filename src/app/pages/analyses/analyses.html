@@ -35,37 +35,31 @@
         <!-- Filtre dataset -->
             <div class="filter-group">
                 <select class="filter-select-modern"
-        (change)="selectedDataset.set($any($event.target).value)">
-    <option value="">Tous les datasets</option>
-
-    @for (d of datasetOptions(); track d.id) {
-  <option [value]="d.id">{{ d.name }}</option>
-}
-
-
-</select>
+                (change)="selectedDataset.set($any($event.target).value)">
+                <option value="">Tous les datasets</option>
+                @for (d of datasetOptions(); track d.id) {
+                    <option [value]="d.id">{{ d.name }}</option>}
+                </select>
             </div>
             <div class="separator"></div>
         <!-- Tri -->
             <div class="sort-group">
                 <select class="sort-select-modern"
-        (change)="sortOrder.set($any($event.target).value)"
->
-    <option value="date-desc">Récent</option>
-    <option value="date-asc">Ancien</option>
-</select>
+                (change)="sortOrder.set($any($event.target).value)">
+                <option value="date-desc">Récent</option>
+                <option value="date-asc">Ancien</option>
+            </select>
             </div>
 
         </div>
 
         <div class="separator"></div>
         <div class="new-analyse-section">
-        <button class="new-analyse-btn" (click)="createNewAnalyse()">
-            <i class="ri-add-circle-fill"></i>
-            Nouvelle analyse
-        </button>
+            <button class="new-analyse-btn" (click)="createNewAnalyse()">
+                <i class="ri-add-circle-fill"></i>
+                Nouvelle analyse
+            </button>
         </div>
-
     </div>
     <div class="analyses-list">
 
@@ -83,17 +77,34 @@
                     <div class="texts">
                         <h3>{{ analyse.type }}</h3>
                         <p>Dataset : {{ analyse.datasetName }}</p>
+                        <p>
+                            Colonnes analysées :
+                            <span *ngIf="analyse.column1 || analyse.result?.column || analyse.result?.columnX">
+              <span *ngIf="analyse.column1">{{ analyse.column1 }}</span>
+              <span *ngIf="!analyse.column1 && analyse.result?.column">{{ analyse.result.column }}</span>
+              <span *ngIf="!analyse.column1 && analyse.result?.columnX">{{ analyse.result.columnX }}</span>
+              <span *ngIf="analyse.column2">, {{ analyse.column2 }}</span>
+              <span *ngIf="!analyse.column2 && analyse.result?.columnY">, {{ analyse.result.columnY }}</span>
+            </span>
+            <span *ngIf="!analyse.column1 && !analyse.result?.column && !analyse.result?.columnX">Non spécifiées</span>
+                        </p>
                         <p>{{ analyse.startedAt | date:'dd/MM/yyyy HH:mm' }}</p>
                         <p>{{ analyse.status }}</p>
                     </div>
                 </div>
 
                 <div class="buttons-group">
-    <button class="result-btn" (click)="openDetails(analyse.id!)">Voir les résultats</button>
-    <button class="delete-btn" (click)="deleteAnalyse(analyse.id!)">Supprimer</button>
-</div>
+                    <button class="result-btn" (click)="openDetails(analyse.datasetId)">Voir les résultats</button>
+                    <button class="delete-btn" (click)="deleteAnalyse(analyse.id!)">Supprimer</button>
+                </div>
             </div>
         }
     }
     </div>
+    <div class="pagination">
+        <button class="page-btn" [disabled]="page() === 1"(click)="prevPage()">◀ Précédent</button>
+        <span class="page-info">Page {{ page() }} / {{ totalPages() }}</span>
+        <button class="page-btn" [disabled]="page() === totalPages()"(click)="nextPage()">Suivant ▶</button>
+    </div>
+
 </div>

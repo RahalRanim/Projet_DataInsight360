@@ -23,6 +23,13 @@ export class Analyses {
   // === Pagination ===
   page = signal(1);
   pageSize = 5;
+  nextPage() {
+  this.page.update(p => p + 1);
+}
+
+  prevPage() {
+  this.page.update(p => p - 1);
+}
 
   // Charger analyses au démarrage
   ngOnInit() {
@@ -79,8 +86,9 @@ export class Analyses {
     this.router.navigate(['/analyses/new']);
   }
 
-  openDetails(id: string) {
-    this.router.navigate(['/analyses', id]);
+  openDetails(datasetId: string) {
+    // Naviguer vers la page analyses-details du dataset
+    this.router.navigate(['/analyses', datasetId]);
   }
 
  deleteAnalyse(id: string) {
